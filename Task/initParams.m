@@ -1,0 +1,109 @@
+
+function [condMat, exptP] = initParams(exptP, screenP, subjP)
+%% exptP
+
+% orientation settings
+%exptP.oriRef = [0, 45, 90, 135]; 
+exptP.nOriRef = 4;  
+exptP.oriRef = 0 + 180/exptP.nOriRef * [0:exptP.nOriRef-1];        % [0, 45, 90, 135]
+exptP.jittLim = 10;                          % +- jitterLimit degrees from the reference angle
+
+exptP.nTrial = 40*exptP.nOriRef;
+
+exptP.nPhase = 10;  
+exptP.phase = linspace(0,2*pi,exptP.nPhase+1); 
+    exptP.phase(end) = [];
+exptP.modulator.angFreq = 5;
+exptP.modulator.sinSize = 0.2;      % make sure they are the same as makeExptStim.m
+
+
+
+% Aperture (grey mask)
+exptP.inApert = 1.2;                             % inner aperture (degrees): diameter   
+                                                 % which defines the fixation area
+
+exptP.outApert = screenP.screenYpixels / ...     % outer aperture (degrees): diameter
+    screenP.pixels_per_deg_height;               % which defines the edge of the grey mask
+
+% fixation
+exptP.fixSize = 0.4;                             % inner fixation circle (degrees): diameter
+exptP.fixOutLineSize = 0.8;                      % outer circle of fixation circle: diameter
+exptP.fixCol = 0;                                % inner fixation color, black
+exptP.dimFixCol = 60;                            % dimmed fixation color, for ITI
+
+% gabor stim, should be the same as makeExptStim
+exptP.stim.sfStatic = 1;                         % spatial frequency for drifting gabor in test (cycles per degree)
+exptP.stim.size = 11;                            % diameter for the gabor itself, degrees
+exptP.stim.imgSize = exptP.stim.size+1;         % diameter including smoothed edge, degrees
+exptP.stim.cont = 0.8;                           % contrast of the stimuli
+exptP.stim.innerSize = exptP.inApert;   
+
+% noise mask
+exptP.mask.size = exptP.stim.imgSize;
+exptP.mask.fre_u = exptP.stim.sfStatic; 
+exptP.mask.fre_std = 0.3;
+exptP.mask.ori_u = [];
+exptP.mask.ori_std = [];
+exptP.mask.cont = exptP.stim.cont;
+exptP.mask.dur = 0.1; % duration each time
+exptP.mask.durTimes = 3; % how many times
+
+
+% error & feedback
+% define feedback text position
+exptP.errTextCoords = [screenP.xCenter, screenP.yCenter-...
+    ceil(exptP.fixSize*screenP.pixels_per_deg_height),...
+    screenP.yCenter+2*ceil(exptP.fixSize*screenP.pixels_per_deg_height)];
+% exptP.errorRange = 4:8:28;                     % error smaller than exptP.errorRange(1), earn most points; more than exptP.errorRange(end), earn least/no points 
+% exptP.pointsRange = 0:25:25*length(exptP.errorRange);
+
+% continuous points range, from 0-100, 2 points each step
+exptP.errorRange = 0:50;
+exptP.pointsRange = 100:-2:0;
+
+
+% time durations (in the order of each event within a trial)
+exptP.fixDur = 0.3;                           
+exptP.pres = 1.0;                               
+exptP.delay = 1.0; 
+exptP.respDur = 4.5;
+exptP.errDur = 1.0;
+exptP.iti = [0.2];
+exptP.trialDur = exptP.fixDur + exptP.pres + exptP.delay + exptP.respDur + exptP.errDur + exptP.iti;
+exptP.exptDur = sum(exptP.trialDur) * exptP.nTrial/numel(exptP.trialDur); % duration of total experiment
+exptP.nFramesPres = round(sec2frames(1/screenP.ifi, exptP.pres));    % number of frames for exptP.pres
+exptP.nFramesResp = round(sec2frames(1/screenP.ifi, exptP.respDur)); % number of frames for exptP.respDur
+
+
+%% condMat
+
+exptP.label = {'1:index' '2:phase' '3:oriRef' ...
+    '4:oriJitt' '5:oriFinal' '6:oriRespInit' '7:oriRespFinal' ...
+    '8:error' '9:points' '10:rt' '11:outoftime' '12:iti'};
+
+% find index of label
+f = @(label)find(cellfun(@(y)~isempty(y),cellfun(@(x){strfind(x,label)},exptP.label)));
+
+signVec = [-1 1];   % set random orientation jitter
+itiVec = repmat([exptP.iti]', [exptP.nTrial/numel(exptP.iti), 1])'; % set random iti
+
+% set experimental conditions
+% counterbalance between trig and oriRef
+exptConditions = SetConditions(exptP.nTrial, [exptP.nPhase, exptP.nOriRef]);
+
+condMat = nan(exptP.nTrial, length(exptP.label));
+condMat(:,f('phase')) = exptConditions{1}';
+condMat(:,f('oriRef')) = exptConditions{2}';
+condMat(:,f('oriJitt')) = round(exptP.jittLim*rand([exptP.nTrial 1])).*[signVec(randi(2, [exptP.nTrial 1]))]';
+condMat(:,f('oriFinal')) = exptP.oriRef(condMat(:,f('oriRef')))'+condMat(:,f('oriJitt'));
+    condMat(condMat(:,f('oriFinal'))<0,f('oriFinal')) = condMat(condMat(:,f('oriFinal'))<0,f('oriFinal'))+180;
+    condMat(condMat(:,f('oriFinal'))>179,f('oriFinal')) = condMat(condMat(:,f('oriFinal'))>179,f('oriFinal'))-180;
+condMat(:,f('oriRespInit')) = round(0 + 180 * rand([exptP.nTrial 1])); %random orientation between 0-180
+condMat(:,f('iti')) = itiVec(randperm(numel(itiVec)));
+
+% randomize
+condMat = condMat(randperm(exptP.nTrial),:);    
+condMat(:,f('index')) = [1:exptP.nTrial]';
+
+
+return
