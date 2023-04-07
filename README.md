@@ -10,6 +10,9 @@ Input subject number (e.g., 1) and run number (e.g., 1).
 
 Normally, each subject only needs to do 1 run. In case you meet some problems during the task, you can use another run number for the subject to collect new data.
 
+Press 'SPACE' to start, during the response, use 'left' and 'right' arrow to adjust the orientation and press 'SPACE' to submit your answer.
+
+
 Each run has 160 trials, which will take around 20mins in total.
 
 
