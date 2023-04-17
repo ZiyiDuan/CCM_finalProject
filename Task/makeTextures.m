@@ -7,7 +7,7 @@ function [imTex, maskGreyTex] = makeTextures(exptP, screenP, maskGrey)
         Screen('Flip', screenP.win);
         
         %% create the texture for stimuli
-        exptP.system = 'others';
+%         exptP.system = 'others';
         
         % define current stimuli 
         fname = ['exptStim_', exptP.system, '.mat'];

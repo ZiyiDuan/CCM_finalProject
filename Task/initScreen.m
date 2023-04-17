@@ -27,7 +27,10 @@ function screen = initScreen(exptP)
     screen.red = [255, 0, 0];
 
     % textsize
-    screen.textSize = 55;
+    screen.textSize = 25;
+    if strcmp(exptP.system, 'others')
+        screen.textSize = 55;
+    end
 
 
     % open window

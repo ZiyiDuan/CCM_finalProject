@@ -227,7 +227,7 @@ function task()
 
         % print out error
         finalError = abs(condMat(ii,f('error')));
-        errText = sprintf('%.1f Â° error', finalError);
+        errText = sprintf('%.1f ° error', finalError);
         DrawFormattedText(screenP.win, errText, 'center',exptP.errTextCoords(2), screenP.white);
         DrawFormattedText(screenP.win, feedbackText, 'center', exptP.errTextCoords(3), screenP.white);
 
