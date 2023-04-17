@@ -10,11 +10,39 @@ function task()
     %% ---------------------------------- INITIALIZING ---------------------------------
     %%% debug
     exptP.debug = 0;
-    exptP.system = 'others';
-    exptP.scanner = 0;
-    exptP.display = 1;
-    exptP.powermate = 0;
-    eyeP.eyeTracking = 0;
+    
+    %%% check which system running on
+    [ret, hostname] = system('hostname');
+    if ret ~= 0
+      hostname = getenv('HOSTNAME');
+    end
+    hostname = strtrim(hostname);
+    
+    if strcmp(hostname, 'STIMULUS-MAC.CBI.FAS.NYU.EDU')
+        exptP.system = 'scanRoom';
+        exptP.scanner = 1;          % 1 for scanner, 0 for others
+        exptP.display = 1;          % 1 for Mac retinotopy display, 0 for other display
+        exptP.powermate = 0;        % 1 for powermate, 0 for keyboard
+        eyeP.eyeTracking = 1;       % 1=do eyetracking
+        if exptP.debug == 1
+            eyeP.eyeTracking = 0;
+        end
+    elseif strcmp(hostname, 'viper.psych.nyu.edu')
+        exptP.system = 'exptRoom';
+        exptP.scanner = 0;
+        exptP.display = 1;
+        exptP.powermate = 0;
+        eyeP.eyeTracking = 0;
+        if exptP.debug == 1
+            eyeP.eyeTracking = 0;
+        end
+    else
+        exptP.system = 'others';
+        exptP.scanner = 0;
+        exptP.display = 1;
+        exptP.powermate = 0;
+        eyeP.eyeTracking = 0;
+    end
 
     %%% sbj info
     subjP = initSubjectInfo();
