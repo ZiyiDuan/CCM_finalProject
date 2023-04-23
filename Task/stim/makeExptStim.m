@@ -1,7 +1,9 @@
 
 function finalStim = makeExptStim()
+    addpath(genpath('/Applications/Psychtoolbox/'));    
+    
     % ask for system
-    exptSystem = 'others';
+    exptSystem = input('system: exptRoom, or others, or HHL?', 's');
 
     load(['screenP', '_', exptSystem, '.mat']); 
         % -this is on apocalypse/behavioral room

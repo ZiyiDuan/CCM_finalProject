@@ -18,12 +18,12 @@ function task()
     end
     hostname = strtrim(hostname);
     
-    if strcmp(hostname, 'STIMULUS-MAC.CBI.FAS.NYU.EDU')
-        exptP.system = 'scanRoom';
-        exptP.scanner = 1;          % 1 for scanner, 0 for others
+    if strcmp(hostname, 'http://10-17-169-39.dynapool.wireless.nyu.edu/') || strcmp(hostname, 'Hsing-Hao-Lees-MacBook-Air.local')
+        exptP.system = 'HHL';
+        exptP.scanner = 0;          % 1 for scanner, 0 for others
         exptP.display = 1;          % 1 for Mac retinotopy display, 0 for other display
         exptP.powermate = 0;        % 1 for powermate, 0 for keyboard
-        eyeP.eyeTracking = 1;       % 1=do eyetracking
+        eyeP.eyeTracking = 0;       % 1=do eyetracking
         if exptP.debug == 1
             eyeP.eyeTracking = 0;
         end
@@ -265,7 +265,24 @@ function task()
 
         %% Timing
         trialTime(7,ii) = GetSecs - runTime(1,1) - trialTime(1,ii);  % total trial duration
-          
+
+        if ii == round(exptP.nTrial/2)
+            % take a break
+            % show instructions
+            inst = sprintf(['You are on the half way! Take a short break\n '...
+                'Press SPACE to continue']);
+            DrawFormattedText(screenP.win, inst, 'center', 'center');
+            Screen('Flip', screenP.win);
+
+            WaitSecs(1);
+            % start the experiment
+            while true
+                [~,secs, keyCode, deltaSecs] = KbCheck(-1);
+                if find(keyCode) == keyP.startKey
+                    break
+                end
+            end
+        end
     end
 
     %% ---------------------------------- ALL TRIALS FINISHED ----------------------------------
