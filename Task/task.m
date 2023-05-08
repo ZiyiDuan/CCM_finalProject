@@ -266,7 +266,7 @@ function task()
         %% Timing
         trialTime(7,ii) = GetSecs - runTime(1,1) - trialTime(1,ii);  % total trial duration
 
-        if ii == round(exptP.nTrial/2)
+        if ii == 2 %round(exptP.nTrial/2)
             % take a break
             % show instructions
             inst = sprintf(['You are on the half way! Take a short break\n '...
